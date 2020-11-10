@@ -3,6 +3,8 @@ package br.com.aodes.lojavirtual.services;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -10,9 +12,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import br.com.aodes.lojavirtual.domain.Cidade;
 import br.com.aodes.lojavirtual.domain.Cliente;
+import br.com.aodes.lojavirtual.domain.Endereco;
+import br.com.aodes.lojavirtual.domain.enums.TipoCliente;
 import br.com.aodes.lojavirtual.dto.ClienteDTO;
+import br.com.aodes.lojavirtual.dto.ClienteNewDTO;
 import br.com.aodes.lojavirtual.repositories.ClienteRepository;
+import br.com.aodes.lojavirtual.repositories.EnderecoRepository;
 import br.com.aodes.lojavirtual.services.exceptions.DataIntegrityException;
 import br.com.aodes.lojavirtual.services.exceptions.ObjectNotFoundException;
 
@@ -22,17 +29,29 @@ public class ClienteService {
 	@Autowired
 	ClienteRepository clienteRepository;
 	
+	@Autowired
+	EnderecoRepository enderecoRepository;
+
 	public Cliente findById(Integer id) {
 		Optional<Cliente> obj = clienteRepository.findById(id);
 		if (obj.isEmpty()) {
-			throw new ObjectNotFoundException("Cliente não encontrado! id: " + id + " Tipo: " + Cliente.class.getName());
+			throw new ObjectNotFoundException(
+					"Cliente não encontrado! id: " + id + " Tipo: " + Cliente.class.getName());
 		}
 		return obj.get();
 	}
-	
+
+	@Transactional
+	public Cliente insert(Cliente obj) {
+		obj.setId(null);
+		obj = clienteRepository.save(obj);
+		enderecoRepository.saveAll(obj.getEnderecos());
+		return obj;
+	}
+
 	public Cliente update(Cliente obj) {
 		Cliente newObj = findById(obj.getId());
-		updateData(newObj , obj);
+		updateData(newObj, obj);
 		return clienteRepository.save(newObj);
 	}
 
@@ -54,15 +73,35 @@ public class ClienteService {
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		return clienteRepository.findAll(pageRequest);
 	}
-	
+
 	public Cliente fromDTO(ClienteDTO objDto) {
-		//throw new UnsupportedOperationException("Metodo ainda não implementado	");
+		// throw new UnsupportedOperationException("Metodo ainda não implementado ");
 		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null);
 	}
-	
+
 	private void updateData(Cliente newObj, Cliente obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setEmail(obj.getEmail());
+	}
+
+	public Cliente fromDTO(ClienteNewDTO objDto) {
+
+		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(),
+				TipoCliente.toEnum(objDto.getTipo()));
+		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
+		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(),
+				objDto.getBairro(), objDto.getCep(), cli, cid);
+
+		cli.getEnderecos().add(end);
+		cli.getTelefones().add(objDto.getTelefone1());
+
+		if (objDto.getTelefone2() != null) {
+			cli.getTelefones().add(objDto.getTelefone2());
+		}
+		if (objDto.getTelefone3() != null) {
+			cli.getTelefones().add(objDto.getTelefone3());
+		}
+		return cli;
 	}
 
 }
