@@ -34,11 +34,8 @@ public class ClienteService {
 
 	public Cliente findById(Integer id) {
 		Optional<Cliente> obj = clienteRepository.findById(id);
-		if (obj.isEmpty()) {
-			throw new ObjectNotFoundException(
-					"Cliente não encontrado! id: " + id + " Tipo: " + Cliente.class.getName());
-		}
-		return obj.get();
+		return obj.orElseThrow(() -> new ObjectNotFoundException(
+				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
 	}
 
 	@Transactional
@@ -79,10 +76,6 @@ public class ClienteService {
 		return new Cliente(objDto.getId(), objDto.getNome(), objDto.getEmail(), null, null);
 	}
 
-	private void updateData(Cliente newObj, Cliente obj) {
-		newObj.setNome(obj.getNome());
-		newObj.setEmail(obj.getEmail());
-	}
 
 	public Cliente fromDTO(ClienteNewDTO objDto) {
 
@@ -102,6 +95,12 @@ public class ClienteService {
 			cli.getTelefones().add(objDto.getTelefone3());
 		}
 		return cli;
+	}
+	
+
+	private void updateData(Cliente newObj, Cliente obj) {
+		newObj.setNome(obj.getNome());
+		newObj.setEmail(obj.getEmail());
 	}
 
 }

@@ -26,13 +26,8 @@ public class CategoriaService {
 
 	public Categoria findById(Integer id) {
 		Optional<Categoria> obj = categoriaRepository.findById(id);
-
-		if (obj.isEmpty()) {
-
-			throw new ObjectNotFoundException(
-					"Objeto não encontrado! ID: " + id + " Tipo: " + Categoria.class.getName());
-		}
-		return obj.get();
+		return obj.orElseThrow(() -> new ObjectNotFoundException(
+				"Objeto não encontrado! Id: " + id + ", Tipo: " + Categoria.class.getName()));
 	}
 
 	@Transactional
@@ -41,6 +36,7 @@ public class CategoriaService {
 		return categoriaRepository.save(obj);
 	}
 
+	
 	public Categoria update(Categoria obj) {
 		Categoria newObj = findById(obj.getId());
 		updateData(newObj , obj);
