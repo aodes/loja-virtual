@@ -112,10 +112,10 @@ public class ItemPedido implements Serializable {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
-		NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+		NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt","BR"));
 		StringBuilder builder = new StringBuilder();
 		builder.append(getProduto().getNome());
 		builder.append(", Qte: ");
@@ -127,5 +127,7 @@ public class ItemPedido implements Serializable {
 		builder.append("\n");
 		return builder.toString();
 	}
+	
+
 
 }

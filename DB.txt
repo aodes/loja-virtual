@@ -1,9 +1,0 @@
- mysqldump -u root -p curso_spring > arquivo.sql
-
-CLEARDB_DATABASE_URL: mysql://b64be92291570c:ce991d73@us-cdbr-east-02.cleardb.com/heroku_cd6aeec96e933ea?reconnect=true
-
-Modelo
-mysql --host=us-cdbr-iron-east-05.cleardb.net --user=b8782e4e3f88f4 --password=b9748a8b
---reconnect heroku_71216a81091a2da < arquivo.sql
-
-mysql --host=us-cdbr-east-02.cleardb.com --user=b64be92291570c --password=ce991d73 --reconnect heroku_cd6aeec96e933ea < arquivo.sql
