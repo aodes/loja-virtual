@@ -16,11 +16,14 @@ import org.springframework.stereotype.Service;
 import br.com.aodes.lojavirtual.domain.Cidade;
 import br.com.aodes.lojavirtual.domain.Cliente;
 import br.com.aodes.lojavirtual.domain.Endereco;
+import br.com.aodes.lojavirtual.domain.enums.Perfil;
 import br.com.aodes.lojavirtual.domain.enums.TipoCliente;
 import br.com.aodes.lojavirtual.dto.ClienteDTO;
 import br.com.aodes.lojavirtual.dto.ClienteNewDTO;
 import br.com.aodes.lojavirtual.repositories.ClienteRepository;
 import br.com.aodes.lojavirtual.repositories.EnderecoRepository;
+import br.com.aodes.lojavirtual.security.UserSS;
+import br.com.aodes.lojavirtual.services.exceptions.AuthorizationException;
 import br.com.aodes.lojavirtual.services.exceptions.DataIntegrityException;
 import br.com.aodes.lojavirtual.services.exceptions.ObjectNotFoundException;
 
@@ -37,6 +40,12 @@ public class ClienteService {
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public Cliente findById(Integer id) {
+		
+		UserSS user = UserService.authenticated();
+		if (user == null || !user.hasRole(Perfil.ADMIN) && !id.equals(user.getId())) {
+			throw new AuthorizationException("Acesso Negado");
+		}
+		
 		Optional<Cliente> obj = clienteRepository.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
